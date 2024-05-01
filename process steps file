@@ -1,0 +1,112 @@
+./mvnw spring-boot:build-image "-Dspring-boot.build-image.imageName=piyush12singh/spring-postgres-docker-image:01"
+
+Successfully built image 'docker.io/piyush12singh/spring-postgres-docker-image:01'
+
+docker push piyush12singh/spring-postgres-docker-image:01
+
+docker pull postgres
+docker pull dpage/pgadmin4
+
+docker network ls
+docker network create spring-postgres-net
+
+// attach postgres to given network 
+docker run -d --name postgresdb --network spring-postgres-net -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=docker-postgres  postgres
+
+// attach spring-image to given network 
+docker run  --name postgres_spring --network spring-postgres-net -p 9002:8080 piyush12singh/spring-postgres-docker-image:01
+
+// for going inside the postgres container
+
+docker exec -it postgresdb bash
+psql -U postgres -d docker-postgres
+\l    => for seeing list of database      or   SELECT datname FROM pg_database;
+
+
+\dt  => for showing table inside that db 
+\d user_model => for going inside table 
+SELECT * FROM user_model;     =>  for showing all information 
+// for pgadmin
+docker run -d --name pgadmin --network spring-postgres-net -e PGADMIN_DEFAULT_EMAIL=user@domain.com -e PGADMIN_DEFAULT_PASSWORD=pgadmin -p 5050:80 dpage/pgadmin4
+
+// step 1. Add server
+// step 2. Give any name to server
+// step 3. Give Host name as your container name of your database (here the container name of our postgres image is postgresdb)
+// step 4. Provide the username and password which we give in docker like username=> postgres and password=> postgres 
+
+// from postman
+
+http://localhost:9002/api/post
+
+
+docker run -d --name postgresdb --network spring-postgres-net -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=docker-postgres postgres 
+docker run --name postgres_spring --network spring-postgres-net -p 9002:8080 piyush12singh/spring-postgres-docker-image:01
+docker run -d --name pgadmin --network spring-postgres-net -e PGADMIN_DEFAULT_EMAIL=user@domain.com -e PGADMIN_DEFAULT_PASSWORD=pgadmin -p 5050:80 dpage/pgadmin4 
+
+
+convert this cli command to docker-compose yaml file
+
+
+// docker compose 
+
+version: '3.8'
+
+services:
+  postgresdb:
+    image: postgres
+    container_name: postgresdb
+    networks:
+      - spring-postgres-net
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: docker-postgres
+
+  postgres_spring:
+    image: piyush12singh/spring-postgres-docker-image:01
+    container_name: postgres_spring
+    networks:
+      - spring-postgres-net
+    ports:
+      - "9002:8080"
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    networks:
+      - spring-postgres-net
+    environment:
+      PGADMIN_DEFAULT_EMAIL: user@domain.com
+      PGADMIN_DEFAULT_PASSWORD: pgadmin
+    ports:
+      - "5050:80"
+
+networks:
+  spring-postgres-net:
+    driver: bridge
+
+
+
+
+
+// application.property 
+
+spring.application.name=user 
+#spring.datasource.url=jdbc:postgresql://localhost:5432/docker-postgres 
+spring.datasource.url=jdbc:postgresql://postgresdb:5432/docker-postgres 
+spring.datasource.username=postgres 
+spring.datasource.password=postgres 
+spring.datasource.driver-class-name=org.postgresql.Driver 
+spring.jpa.show-sql=true spring.jpa.generate-ddl=true 
+spring.jpa.hibernate.ddl-auto=update
+
+
+
+
+
+
+
+
+
+
+
