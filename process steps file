@@ -97,7 +97,8 @@ spring.datasource.url=jdbc:postgresql://postgresdb:5432/docker-postgres
 spring.datasource.username=postgres 
 spring.datasource.password=postgres 
 spring.datasource.driver-class-name=org.postgresql.Driver 
-spring.jpa.show-sql=true spring.jpa.generate-ddl=true 
+spring.jpa.show-sql=true 
+spring.jpa.generate-ddl=true 
 spring.jpa.hibernate.ddl-auto=update
 
 
