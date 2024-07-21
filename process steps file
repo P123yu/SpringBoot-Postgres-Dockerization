@@ -103,6 +103,9 @@ spring.jpa.hibernate.ddl-auto=update
 
 
 
+// remove all volume 
+
+docker volume rm $(docker volume ls -q)
 
 
 
